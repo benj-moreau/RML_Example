@@ -1,0 +1,54 @@
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# ------ Definition of a resource (subject) of type Person
+<#Person> rml:logicalSource [ rml:iterator "$.[*].fields" ;
+            # ------ we use JSONPath to read json file
+            rml:referenceFormulation ql:JSONPath ;
+            # ------ the path to the file containing Persons
+            rml:source "roman-emperors.json" ] ;
+    # ------ Definition of each Predicate-Object associated with the Person subject
+    rr:predicateObjectMap [ rr:objectMap [ rml:reference "$.name" ] ;
+            # ------ URI predicate
+            rr:predicate rdfs:label ],
+                         # ------ JSONPath expression to access the value 
+        [ rr:objectMap [ rml:reference "$.dynasty" ] ;
+            rr:predicate <http://simile.mit.edu/2003/10/ontologies/vraCore3#dynasty> ],
+        [ rr:objectMap [ rml:reference "$.name_full" ] ;
+            rr:predicate <http://xmlns.com/foaf/0.1/name> ],
+        [ rr:objectMap [ rml:reference "$.reign_start" ] ;
+            rr:predicate <http://dbpedia.org/ontology/startReign> ],
+                        # ------ The object is a reference
+        [ rr:objectMap [ rr:parentTriplesMap <#PopulatedPlace> ] ;
+            rr:predicate <http://dbpedia.org/ontology/city> ],
+        [ rr:objectMap [ rml:reference "$.era" ] ;
+            rr:predicate <http://dbpedia.org/ontology/era> ],
+        [ rr:objectMap [ rml:reference "$.death" ] ;
+            rr:predicate <http://dbpedia.org/ontology/deathPlace> ],
+        [ rr:objectMap [ rml:reference "$.birth_prv" ] ;
+            rr:predicate <http://dbpedia.org/ontology/birthPlace> ],
+        [ rr:objectMap [ rml:reference "$.reign_end" ] ;
+            rr:predicate <http://dbpedia.org/ontology/endReign> ],
+        [ rr:objectMap [ rml:reference "$.image" ] ;
+            rr:predicate <http://xmlns.com/foaf/0.1/img> ],
+        [ rr:objectMap [ rml:reference "$.birth" ] ;
+            rr:predicate <http://dbpedia.org/ontology/birthPlace> ] ;
+                    # ------ Defining the type of the subject 
+    rr:subjectMap [ rr:class <http://xmlns.com/foaf/0.1/Person> ;
+            # ------ Defining the URI of the subject
+            rr:template "http://ods.dataset.com/Person/{name}" ] .
+
+# ------ Another resource definition linked to the Person resource
+<#PopulatedPlace> rml:logicalSource [ rml:iterator "$.[*].fields" ;
+            rml:referenceFormulation ql:JSONPath ;
+            rml:source "roman-emperors.json" ] ;
+    rr:subjectMap [ rr:class <http://dbpedia.org/ontology/PopulatedPlace> ;
+            rr:template "http://ods.dataset.com/PopulatedPlace/{birth_cty}" ] ;
+    rr:predicateObjectMap [ rr:objectMap [ rml:reference "$.birth_cty" ] ;
+            rr:predicate rdfs:label ].
+
